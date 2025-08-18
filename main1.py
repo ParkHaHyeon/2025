@@ -104,38 +104,17 @@ quotes = {
     }
 }
 
-# -----------------------------
-# Streamlit 앱 UI
-# -----------------------------
-st.title("📚 MBTI + 날씨 기반 한국 문학 글귀 추천")
-st.write("당신의 MBTI와 오늘의 날씨를 바탕으로 글귀를 추천해드립니다.")
+st.title("📖 MBTI로 만나는 한국 문학의 한 구절")
 
-# 1. MBTI 선택
-mbti = st.selectbox("당신의 MBTI를 선택하세요:", list(quotes.keys()))
+# 사용자 MBTI 입력
+mbti = st.text_input("당신의 MBTI를 입력하세요 (예: INFJ)").upper()
 
-# 2. 날씨 API (OpenWeatherMap)
-city = st.text_input("당신의 도시를 입력하세요:", "Seoul")
-api_key = "YOUR_API_KEY"  # OpenWeatherMap API 키 입력
-
-if st.button("오늘의 글귀 추천받기"):
-    try:
-        url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&lang=kr&units=metric"
-        response = requests.get(url)
-        data = response.json()
-
-        if data["cod"] == 200:
-            weather = data["weather"][0]["description"]
-            temp = data["main"]["temp"]
-
-            st.success(f"📍 {city}의 날씨: {weather}, {temp}°C")
-
-            # 선택된 글귀 출력
-            selected = quotes[mbti]
-            st.subheader("오늘의 추천 글귀 ✨")
-            st.write(f"“{selected['text']}”")
-            st.caption(f"— {selected['author']}, {selected['work']} ({selected['publisher']})")
-
-        else:
-            st.error("날씨 정보를 불러오지 못했습니다. 도시 이름을 확인해주세요.")
-    except:
-        st.error("API 연결에 문제가 있습니다.")
+if mbti in quotes:
+    selected = random.choice(quotes[mbti])
+    st.markdown(f"""
+    > **{selected['text']}**  
+    — {selected['author']}, *{selected['work']}* ({selected['publisher']})
+    """)
+else:
+    if mbti:
+        st.write("아직 준비되지 않은 MBTI예요. 다른 유형을 입력해 보세요 😊")
