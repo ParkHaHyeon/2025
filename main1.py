@@ -1,6 +1,6 @@
 import streamlit as st
 import random
-import requests
+
 
 # -----------------------------
 # 한국 문학 인용구 (MBTI별)
@@ -104,17 +104,14 @@ quotes = {
     }
 }
 
-st.title("📖 MBTI로 만나는 한국 문학의 한 구절")
+st.title("📚 MBTI 기반 한국 문학 글귀 추천기")
 
-# 사용자 MBTI 입력
-mbti = st.text_input("당신의 MBTI를 입력하세요 (예: INFJ)").upper()
+st.write("당신의 MBTI를 선택하면, 어울리는 한국 문학 글귀를 추천해드립니다.")
 
-if mbti in quotes:
-    selected = random.choice(quotes[mbti])
-    st.markdown(f"""
-    > **{selected['text']}**  
-    — {selected['author']}, *{selected['work']}* ({selected['publisher']})
-    """)
-else:
-    if mbti:
-        st.write("아직 준비되지 않은 MBTI예요. 다른 유형을 입력해 보세요 😊")
+# 드롭다운 선택
+mbti = st.selectbox("MBTI 유형을 선택하세요:", list(quotes.keys()))
+
+# 추천 버튼
+if st.button("글귀 추천받기"):
+    chosen_quote = random.choice(quotes[mbti])
+    st.success(chosen_quote)
