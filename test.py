@@ -1,6 +1,6 @@
 import streamlit as st
 import random
-from PIL import Image
+# from PIL import Image  # PIL 라이브러리는 로컬 파일이 있을 때만 필요하므로 주석 처리합니다.
 
 # 펫의 상태를 관리하기 위한 세션 상태
 if 'pet_happiness' not in st.session_state:
@@ -8,12 +8,11 @@ if 'pet_happiness' not in st.session_state:
 if 'game_result' not in st.session_state:
     st.session_state.game_result = ""
 
-# 펫의 상태에 따른 이미지 경로 설정 (예시)
-# 실제로는 원하는 이미지 파일의 경로로 바꿔주세요.
-image_paths = {
-    'happy': 'happy_pet.png',
-    'neutral': 'neutral_pet.png',
-    'sad': 'sad_pet.png'
+# 펫의 상태에 따른 이미지 URL 설정 (인터넷 링크 사용)
+image_urls = {
+    'happy': 'https://i.imgur.com/GzB9oJ5.png',  # 행복한 펫 이미지 (예시)
+    'neutral': 'https://i.imgur.com/H1J6M7J.png', # 보통 펫 이미지 (예시)
+    'sad': 'https://i.imgur.com/vHq136M.png'    # 슬픈 펫 이미지 (예시)
 }
 
 # 펫의 상태에 따라 이미지와 메시지 결정
@@ -29,14 +28,15 @@ def get_pet_state():
 def coin_flip_game(user_choice):
     st.write('동전을 뒤집습니다...')
     coin_result = random.choice(['앞면', '뒷면'])
-
+    
     if user_choice == coin_result:
         st.session_state.game_result = f'🎉 와! 맞혔어요! 동전은 "{coin_result}"이(가) 나왔어요.'
         st.session_state.pet_happiness = min(100, st.session_state.pet_happiness + 20)
     else:
         st.session_state.game_result = f'😅 아쉽네요... 동전은 "{coin_result}"이(가) 나왔어요.'
         st.session_state.pet_happiness = max(0, st.session_state.pet_happiness - 10)
-    st.experimental_rerun()
+    
+    st.rerun()
 
 # Streamlit 페이지 구성
 st.title('나만의 가상 펫')
@@ -45,13 +45,8 @@ st.write('펫과 함께 놀아주며 스트레스를 해소해 보세요!')
 # 펫의 상태 가져오기
 state, message = get_pet_state()
 
-# 펫 이미지 표시 (파일이 없으면 오류가 날 수 있으니 참고용으로 사용하세요)
-try:
-    pet_image = Image.open(image_paths[state])
-    st.image(pet_image, width=300)
-except FileNotFoundError:
-    st.image('https://via.placeholder.com/300', caption='펫 이미지 준비 중...', width=300)
-
+# 펫 이미지 표시 (인터넷 링크 사용)
+st.image(image_urls[state], width=300)
 st.write(message)
 
 # 펫과 상호작용하는 버튼
@@ -61,19 +56,19 @@ with col1:
     if st.button('쓰다듬기'):
         st.session_state.pet_happiness = min(100, st.session_state.pet_happiness + 15)
         st.session_state.game_result = ""  # 게임 결과 초기화
-        st.experimental_rerun()
+        st.rerun()
 
 with col2:
     if st.button('간식 주기'):
         st.session_state.pet_happiness = min(100, st.session_state.pet_happiness + 10)
         st.session_state.game_result = ""  # 게임 결과 초기화
-        st.experimental_rerun()
+        st.rerun()
 
 with col3:
     if st.button('냅두기'):
         st.session_state.pet_happiness = max(0, st.session_state.pet_happiness - 5)
         st.session_state.game_result = ""  # 게임 결과 초기화
-        st.experimental_rerun()
+        st.rerun()
 
 # 현재 행복도 상태바 표시
 st.progress(st.session_state.pet_happiness / 100)
