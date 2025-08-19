@@ -70,7 +70,7 @@ if st.session_state.view == 'setup':
     with col_b:
         if st.button('랜덤 이름 넣기 🎲', use_container_width=True):
             # 간단 랜덤 이름
-            candidates = ["콩이", "초코", "보리", "하늘", "몽실이", "다람이", "쿠키"]
+            candidates = ["콩이", "희망이", "콜라", "겨울이", "동강이", "장군이", "네로"]
             st.session_state.pet_name = random.choice(candidates)
             st.session_state.user_name = st.session_state.user_name or "사용자"
             st.rerun()
