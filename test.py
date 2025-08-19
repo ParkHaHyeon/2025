@@ -125,7 +125,7 @@ elif st.session_state.view == 'game':
     st.image(image_urls.get(state, 'https://via.placeholder.com/300?text=Image+Not+Found'), width=300)
     st.write(message)
     st.write(f'{st.session_state.pet_name}과(와) 동전 뒤집기 게임을 해보세요! 맞히면 행복도가 올라가요.')
-      st.progress(st.session_state.pet_happiness / 100)
+     
     st.write(f'{st.session_state.pet_name}의 현재 행복도: {st.session_state.pet_happiness}%')
 
     game_col1, game_col2 = st.columns(2)
