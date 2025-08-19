@@ -13,9 +13,9 @@ if 'user_name' not in st.session_state:
 
 # 펫의 상태에 따른 이미지 URL 설정 (인터넷 링크 사용)
 image_urls = {
-    'happy': 'https://i.imgur.com/GzB9oJ5.png',  # 행복한 펫 이미지 (예시)
-    'neutral': 'https://i.imgur.com/H1J6M7J.png', # 보통 펫 이미지 (예시)
-    'sad': 'https://i.imgur.com/vHq136M.png'    # 슬픈 펫 이미지 (예시)
+    'happy: https://i.imgur.com/GzB9oJ5.png',  # 행복한 펫 이미지 (예시)
+    'neutral: https://i.imgur.com/H1J6M7J.png', # 보통 펫 이미지 (예시)
+    'sad: https://i.imgur.com/vHq136M.png'    # 슬픈 펫 이미지 (예시)
 }
 
 # 펫의 상태에 따라 이미지와 메시지 결정
@@ -75,7 +75,7 @@ with col2:
         st.rerun()
 
 with col3:
-    if st.button('냅두기'):
+    if st.button('가만히 두기'):
         st.session_state.pet_happiness = max(0, st.session_state.pet_happiness - 5)
         st.session_state.game_result = ""
         st.rerun()
@@ -104,7 +104,3 @@ user_text = st.text_input(f'{st.session_state.pet_name}에게 말을 걸어보�
 if user_text:
     st.write(f'{st.session_state.pet_name}: "{user_text}라고요? 고마워요!"')
 
-# 이미지 표시 문제에 대한 추가 안내
-st.subheader("이미지가 보이지 않으신다면:")
-st.write("- 인터넷 연결이 안정적인지 확인해주세요.")
-st.write("- 이미지 URL이 올바른지 다시 한번 확인해주세요. 제공된 링크는 예시입니다.")
