@@ -76,7 +76,7 @@ if st.session_state.view == 'setup':
             st.rerun()
 
 elif st.session_state.view == 'home':
-    st.write(f'{st.session_state.pet_name}과(와) 함께 놀아주며 스트레스를 해소해 보세요!')
+    st.write(f'{st.session_state.pet_name}를(을) 놀아주며 스트레스를 해소해 보세요!')
 
     state, message = get_pet_state()
     st.image(image_urls.get(state, 'https://via.placeholder.com/300?text=Image+Not+Found'), width=300)
