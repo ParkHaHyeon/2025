@@ -1,12 +1,15 @@
 import streamlit as st
 import random
-# from PIL import Image  # PIL 라이브러리는 로컬 파일이 있을 때만 필요하므로 주석 처리합니다.
 
-# 펫의 상태를 관리하기 위한 세션 상태
+# 세션 상태 초기화
 if 'pet_happiness' not in st.session_state:
     st.session_state.pet_happiness = 50
 if 'game_result' not in st.session_state:
     st.session_state.game_result = ""
+if 'pet_name' not in st.session_state:
+    st.session_state.pet_name = "애완동물"
+if 'user_name' not in st.session_state:
+    st.session_state.user_name = "사용자"
 
 # 펫의 상태에 따른 이미지 URL 설정 (인터넷 링크 사용)
 image_urls = {
@@ -17,36 +20,43 @@ image_urls = {
 
 # 펫의 상태에 따라 이미지와 메시지 결정
 def get_pet_state():
-    if st.session_state.pet_happiness > 70:
-        return 'happy', "정말 행복해 보여요! 😊"
+    if st.session_state.pet_happiness >= 100:
+        return 'happy', f"{st.session_state.user_name}님 사랑해요! 🥰"
+    elif st.session_state.pet_happiness > 70:
+        return 'happy', f"{st.session_state.pet_name}은(는) 정말 행복해 보여요! 😊"
     elif st.session_state.pet_happiness < 30:
-        return 'sad', "으음, 조금 슬퍼 보여요. 😥"
+        return 'sad', f"{st.session_state.pet_name}은(는) 조금 슬퍼 보여요. 😥"
     else:
-        return 'neutral', "기분이 좋아요! 😄"
+        return 'neutral', f"{st.session_state.pet_name}은(는) 기분이 좋아요! 😄"
 
 # 동전 뒤집기 게임 함수
 def coin_flip_game(user_choice):
     st.write('동전을 뒤집습니다...')
     coin_result = random.choice(['앞면', '뒷면'])
-    
+
     if user_choice == coin_result:
         st.session_state.game_result = f'🎉 와! 맞혔어요! 동전은 "{coin_result}"이(가) 나왔어요.'
         st.session_state.pet_happiness = min(100, st.session_state.pet_happiness + 20)
     else:
         st.session_state.game_result = f'😅 아쉽네요... 동전은 "{coin_result}"이(가) 나왔어요.'
         st.session_state.pet_happiness = max(0, st.session_state.pet_happiness - 10)
-    
+
     st.rerun()
 
 # Streamlit 페이지 구성
 st.title('나만의 가상 펫')
-st.write('펫과 함께 놀아주며 스트레스를 해소해 보세요!')
+
+# 펫 이름 및 사용자 이름 입력
+st.session_state.pet_name = st.text_input("펫 이름을 지어주세요:", value=st.session_state.pet_name)
+st.session_state.user_name = st.text_input("당신의 이름을 알려주세요:", value=st.session_state.user_name)
+
+st.write(f'{st.session_state.pet_name}과(와) 함께 놀아주며 스트레스를 해소해 보세요!')
 
 # 펫의 상태 가져오기
 state, message = get_pet_state()
 
 # 펫 이미지 표시 (인터넷 링크 사용)
-st.image(image_urls[state], width=300)
+st.image(image_urls.get(state, 'https://via.placeholder.com/300?text=Image+Not+Found'), width=300)
 st.write(message)
 
 # 펫과 상호작용하는 버튼
@@ -55,27 +65,27 @@ col1, col2, col3 = st.columns(3)
 with col1:
     if st.button('쓰다듬기'):
         st.session_state.pet_happiness = min(100, st.session_state.pet_happiness + 15)
-        st.session_state.game_result = ""  # 게임 결과 초기화
+        st.session_state.game_result = ""
         st.rerun()
 
 with col2:
     if st.button('간식 주기'):
         st.session_state.pet_happiness = min(100, st.session_state.pet_happiness + 10)
-        st.session_state.game_result = ""  # 게임 결과 초기화
+        st.session_state.game_result = ""
         st.rerun()
 
 with col3:
     if st.button('냅두기'):
         st.session_state.pet_happiness = max(0, st.session_state.pet_happiness - 5)
-        st.session_state.game_result = ""  # 게임 결과 초기화
+        st.session_state.game_result = ""
         st.rerun()
 
 # 현재 행복도 상태바 표시
 st.progress(st.session_state.pet_happiness / 100)
-st.write(f'현재 행복도: {st.session_state.pet_happiness}%')
+st.write(f'{st.session_state.pet_name}의 현재 행복도: {st.session_state.pet_happiness}%')
 
-st.subheader('펫과 미니게임하기')
-st.write('펫과 동전 뒤집기 게임을 해보세요! 맞히면 행복도가 올라가요.')
+st.subheader(f'{st.session_state.pet_name}과(와) 미니게임하기')
+st.write(f'{st.session_state.pet_name}과(와) 동전 뒤집기 게임을 해보세요! 맞히면 행복도가 올라가요.')
 
 game_col1, game_col2 = st.columns(2)
 with game_col1:
@@ -90,6 +100,11 @@ if st.session_state.game_result:
     st.write(st.session_state.game_result)
 
 # 펫에게 말 걸기
-user_text = st.text_input('펫에게 말을 걸어보세요:')
+user_text = st.text_input(f'{st.session_state.pet_name}에게 말을 걸어보세요:')
 if user_text:
-    st.write(f'펫: "{user_text}라고요? 고마워요!"')
+    st.write(f'{st.session_state.pet_name}: "{user_text}라고요? 고마워요!"')
+
+# 이미지 표시 문제에 대한 추가 안내
+st.subheader("이미지가 보이지 않으신다면:")
+st.write("- 인터넷 연결이 안정적인지 확인해주세요.")
+st.write("- 이미지 URL이 올바른지 다시 한번 확인해주세요. 제공된 링크는 예시입니다.")
