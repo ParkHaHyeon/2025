@@ -7,12 +7,13 @@ if 'pet_happiness' not in st.session_state:
 if 'game_result' not in st.session_state:
     st.session_state.game_result = ""
 if 'pet_name' not in st.session_state:
-    st.session_state.pet_name = "애완동물"
+    st.session_state.pet_name = ""
 if 'user_name' not in st.session_state:
-    st.session_state.user_name = "사용자"
-# 화면 전환 상태(홈/게임)
+    st.session_state.user_name = ""
+# 화면 전환 상태: 'setup' | 'home' | 'game'
 if 'view' not in st.session_state:
-    st.session_state.view = 'home'  # 'home' 또는 'game'
+    # 이름이 비어 있으면 설정 화면부터, 있으면 홈부터
+    st.session_state.view = 'setup' if not (st.session_state.pet_name and st.session_state.user_name) else 'home'
 
 # 펫의 상태에 따른 이미지 URL
 image_urls = {
@@ -42,16 +43,39 @@ def coin_flip_game(user_choice):
         st.session_state.pet_happiness = max(0, st.session_state.pet_happiness - 10)
     st.rerun()
 
-# 페이지 제목
+# 공통: 제목
 st.title('나만의 가상 펫🐾')
 
-# 펫 이름 및 사용자 이름 입력 (두 화면에서 공통 사용)
-st.session_state.pet_name = st.text_input("펫 이름을 지어주세요:", value=st.session_state.pet_name)
-st.session_state.user_name = st.text_input("당신의 이름을 알려주세요:", value=st.session_state.user_name)
+# 화면 분기
+if st.session_state.view == 'setup':
+    st.subheader('이름 설정')
+    st.caption('펫과 사용자 이름을 정한 뒤 시작하세요.')
 
-# 화면 렌더링 분기
-if st.session_state.view == 'home':
-    # 홈: 펫 상태 화면
+    pet_name_input = st.text_input("펫 이름을 지어주세요:", value=st.session_state.pet_name, placeholder="예: 몽실이")
+    user_name_input = st.text_input("당신의 이름을 알려주세요:", value=st.session_state.user_name, placeholder="예: 상큼한붕어빵")
+
+    col_a, col_b = st.columns([1, 1])
+    with col_a:
+        if st.button('시작하기 ✅', use_container_width=True):
+            # 공백 제거 후 검증
+            p = (pet_name_input or "").strip()
+            u = (user_name_input or "").strip()
+            if not p or not u:
+                st.warning("이름이 비어 있어요. 두 칸 모두 입력해 주세요.")
+            else:
+                st.session_state.pet_name = p
+                st.session_state.user_name = u
+                st.session_state.view = 'home'
+                st.rerun()
+    with col_b:
+        if st.button('랜덤 이름 넣기 🎲', use_container_width=True):
+            # 간단 랜덤 이름
+            candidates = ["콩이", "초코", "보리", "하늘", "몽실이", "다람이", "쿠키"]
+            st.session_state.pet_name = random.choice(candidates)
+            st.session_state.user_name = st.session_state.user_name or "사용자"
+            st.rerun()
+
+elif st.session_state.view == 'home':
     st.write(f'{st.session_state.pet_name}과(와) 함께 놀아주며 스트레스를 해소해 보세요!')
 
     state, message = get_pet_state()
@@ -78,19 +102,23 @@ if st.session_state.view == 'home':
     st.progress(st.session_state.pet_happiness / 100)
     st.write(f'{st.session_state.pet_name}의 현재 행복도: {st.session_state.pet_happiness}%')
 
-    # 홈 → 게임 화면으로 이동 버튼
-    st.markdown("<div style='height: 32px;'></div>", unsafe_allow_html=True)
-    if st.button('게임하기 🎮'):
-        st.session_state.view = 'game'
-        st.rerun()
+    st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
+    colh1, colh2 = st.columns([1,1])
+    with colh1:
+        if st.button('게임하기 🎮', use_container_width=True):
+            st.session_state.view = 'game'
+            st.rerun()
+    with colh2:
+        if st.button('이름 수정 ✏️', use_container_width=True):
+            st.session_state.view = 'setup'
+            st.rerun()
 
-    # 펫에게 말 걸기 (홈에서 운영)
+    # 펫에게 말 걸기
     user_text = st.text_input(f'{st.session_state.pet_name}에게 말을 걸어보세요:')
     if user_text:
         st.write(f'{st.session_state.pet_name}: "{user_text}라고요? 고마워요!"')
 
 elif st.session_state.view == 'game':
-    # 게임 화면
     st.subheader(f'{st.session_state.pet_name}과(와) 미니게임하기🎮')
     st.write(f'{st.session_state.pet_name}과(와) 동전 뒤집기 게임을 해보세요! 맞히면 행복도가 올라가요.')
 
@@ -106,7 +134,6 @@ elif st.session_state.view == 'game':
         st.write(st.session_state.game_result)
 
     st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
-    # 게임 → 홈으로 돌아가기
     if st.button('← 뒤로가기 (펫 화면)'):
         st.session_state.view = 'home'
         st.rerun()
