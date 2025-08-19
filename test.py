@@ -51,8 +51,8 @@ if st.session_state.view == 'setup':
     st.subheader('이름 설정')
     st.caption('펫과 사용자 이름을 정한 뒤 시작하세요.')
 
-    pet_name_input = st.text_input("펫 이름을 지어주세요:", value=st.session_state.pet_name, placeholder="예: 몽실이")
-    user_name_input = st.text_input("당신의 이름을 알려주세요:", value=st.session_state.user_name, placeholder="예: 상큼한붕어빵")
+    pet_name_input = st.text_input("펫 이름을 지어주세요:", value=st.session_state.pet_name, placeholder="예: 가나디")
+    user_name_input = st.text_input("당신의 이름을 알려주세요:", value=st.session_state.user_name, placeholder="예: 홍길동")
 
     col_a, col_b = st.columns([1, 1])
     with col_a:
