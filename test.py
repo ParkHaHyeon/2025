@@ -13,9 +13,9 @@ if 'user_name' not in st.session_state:
 
 # 펫의 상태에 따른 이미지 URL 설정 (인터넷 링크 사용)
 image_urls = {
-    'happy: https://i.imgur.com/GzB9oJ5.png',  # 행복한 펫 이미지 (예시)
-    'neutral: https://i.imgur.com/H1J6M7J.png', # 보통 펫 이미지 (예시)
-    'sad: https://i.imgur.com/vHq136M.png'    # 슬픈 펫 이미지 (예시)
+    'happy': 'https://i.pinimg.com/736x/86/26/b3/8626b38f2f75408cc912f08c104bcfac.jpg',  # 행복한 펫 이미지 (예시)
+    'neutral': 'https://i.pinimg.com/736x/c3/72/ae/c372ae91ad48a58fe556cb41a7250f3a.jpg', # 보통 펫 이미지 (예시)
+    'sad': 'https://i.pinimg.com/736x/90/5e/f0/905ef0274ccdbb8779b73f30c78aece3.jpg'    # 슬픈 펫 이미지 (예시)
 }
 
 # 펫의 상태에 따라 이미지와 메시지 결정
