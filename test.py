@@ -10,6 +10,19 @@ if 'pet_name' not in st.session_state:
     st.session_state.pet_name = ""
 if 'user_name' not in st.session_state:
     st.session_state.user_name = ""
+    if 'game_type' not in st.session_state:
+    st.session_state.game_type = '동전 뒤집기'
+
+# 반응속도 테스트용 상태값
+if 'rt_now' not in st.session_state:
+    st.session_state.rt_now = False
+if 'rt_ready' not in st.session_state:
+    st.session_state.rt_ready = False
+if 'rt_go_time' not in st.session_state:
+    st.session_state.rt_go_time = None
+if 'rt_result' not in st.session_state:
+    st.session_state.rt_result = None
+    
 # 화면 전환 상태: 'setup' | 'home' | 'game'
 if 'view' not in st.session_state:
     # 이름이 비어 있으면 설정 화면부터, 있으면 홈부터
@@ -119,28 +132,162 @@ elif st.session_state.view == 'home':
         st.write(f'{st.session_state.pet_name}: "{user_text}라고요? 고마워요!"')
 
 elif st.session_state.view == 'game':
+    import random, time
+
     st.subheader(f'{st.session_state.pet_name}과(와) 미니게임하기🎮')
-    
-    state, message = get_pet_state()
-    st.image(image_urls.get(state, 'https://via.placeholder.com/300?text=Image+Not+Found'), width=300)
-    st.write(message)
-    st.progress(st.session_state.pet_happiness / 100)
-    st.write(f'{st.session_state.pet_name}의 현재 행복도: {st.session_state.pet_happiness}%')
-    st.markdown("<div style='height: 48px;'></div>", unsafe_allow_html=True)
-    
-    st.write(f'{st.session_state.pet_name}과(와) 동전 뒤집기 게임을 해보세요! 맞히면 행복도가 올라가요.')
-     
+    st.caption('원하는 게임을 골라 즐겨보세요. 성적에 따라 행복도가 변합니다!')
 
-    game_col1, game_col2 = st.columns(2)
-    with game_col1:
-        if st.button('앞면 선택'):
-            coin_flip_game('앞면')
-    with game_col2:
-        if st.button('뒷면 선택'):
-            coin_flip_game('뒷면')
+    game = st.selectbox('게임 선택', ['동전 뒤집기', '가위바위보', '숫자 맞히기', '반응속도 테스트'])
+    st.session_state.game_type = game
 
-    if st.session_state.game_result:
-        st.write(st.session_state.game_result)
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+
+    # 1) 동전 뒤집기
+    if game == '동전 뒤집기':
+        st.write('맞히면 행복도 +20, 틀리면 -10')
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button('앞면 선택', use_container_width=True):
+                coin = random.choice(['앞면', '뒷면'])
+                if coin == '앞면':
+                    st.success(f'정답! 동전은 {coin} 🎉 (행복도 +20)')
+                    st.session_state.pet_happiness = min(100, st.session_state.pet_happiness + 20)
+                else:
+                    st.warning(f'아쉽네요… 동전은 {coin} 😅 (행복도 -10)')
+                    st.session_state.pet_happiness = max(0, st.session_state.pet_happiness - 10)
+        with col2:
+            if st.button('뒷면 선택', use_container_width=True):
+                coin = random.choice(['앞면', '뒷면'])
+                if coin == '뒷면':
+                    st.success(f'정답! 동전은 {coin} 🎉 (행복도 +20)')
+                    st.session_state.pet_happiness = min(100, st.session_state.pet_happiness + 20)
+                else:
+                    st.warning(f'아쉽네요… 동전은 {coin} 😅 (행복도 -10)')
+                    st.session_state.pet_happiness = max(0, st.session_state.pet_happiness - 10)
+
+    # 2) 가위바위보
+    elif game == '가위바위보':
+        st.write('이기면 +15, 비기면 0, 지면 -10')
+        choices = ['가위', '바위', '보']
+
+        def rps_once(user_pick):
+            bot_pick = random.choice(choices)
+            st.write(f'{st.session_state.pet_name}의 선택: {bot_pick}')
+            win = (user_pick == '가위' and bot_pick == '보') or \
+                  (user_pick == '바위' and bot_pick == '가위') or \
+                  (user_pick == '보' and bot_pick == '바위')
+            draw = (user_pick == bot_pick)
+            if win:
+                st.success('이겼어요! 🎉 (행복도 +15)')
+                st.session_state.pet_happiness = min(100, st.session_state.pet_happiness + 15)
+            elif draw:
+                st.info('비겼어요! 🙂 (변화 없음)')
+            else:
+                st.warning('졌어요! 😅 (행복도 -10)')
+                st.session_state.pet_happiness = max(0, st.session_state.pet_happiness - 10)
+
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            if st.button('가위 ✂️', use_container_width=True):
+                rps_once('가위')
+        with c2:
+            if st.button('바위 ✊', use_container_width=True):
+                rps_once('바위')
+        with c3:
+            if st.button('보 ✋', use_container_width=True):
+                rps_once('보')
+
+    # 3) 숫자 맞히기
+    elif game == '숫자 맞히기':
+        st.write('1~5 사이 숫자를 맞히면 +12, 틀리면 -6')
+        if 'target_num' not in st.session_state:
+            st.session_state.target_num = random.randint(1, 5)
+            st.session_state.last_guess_msg = ''
+
+        c_top1, c_top2 = st.columns([1,1])
+        with c_top1:
+            if st.button('새 라운드 시작 🔄', use_container_width=True):
+                st.session_state.target_num = random.randint(1, 5)
+                st.session_state.last_guess_msg = ''
+                st.rerun()
+        with c_top2:
+            pass
+
+        guess = st.number_input('숫자를 고르세요 (1~5)', min_value=1, max_value=5, step=1)
+        if st.button('확인', use_container_width=True):
+            if guess == st.session_state.target_num:
+                st.session_state.last_guess_msg = '정답! 🎉 (행복도 +12)'
+                st.session_state.pet_happiness = min(100, st.session_state.pet_happiness + 12)
+            else:
+                st.session_state.last_guess_msg = f'아쉬워요… 정답은 {st.session_state.target_num} 😅 (행복도 -6)'
+                st.session_state.pet_happiness = max(0, st.session_state.pet_happiness - 6)
+        if st.session_state.get('last_guess_msg'):
+            st.write(st.session_state.last_guess_msg)
+
+    # 4) 반응속도 테스트
+    elif game == '반응속도 테스트':
+        st.write('“시작” 후 랜덤 타이밍에 나타나는 “지금 클릭!” 버튼을 누르세요.')
+        st.caption('1.0초 미만: +15 / 1.0~2.0초: +8 / 2.0초 이상: +0 / 성급한 클릭: -5')
+
+        # 준비/시작
+        if not st.session_state.rt_now:
+            colA, colB = st.columns([1,1])
+            with colA:
+                if st.button('시작 ▶️', use_container_width=True):
+                    st.session_state.rt_result = None
+                    st.session_state.rt_ready = True
+                    delay = random.uniform(1.5, 3.0)
+                    st.info('준비...')
+                    time.sleep(delay)
+                    st.session_state.rt_go_time = time.perf_counter()
+                    st.session_state.rt_now = True
+                    st.rerun()
+            with colB:
+                if st.button('리셋 ♻️', use_container_width=True):
+                    st.session_state.rt_now = False
+                    st.session_state.rt_ready = False
+                    st.session_state.rt_go_time = None
+                    st.session_state.rt_result = None
+                    st.rerun()
+
+        # 클릭 단계
+        if st.session_state.rt_now:
+            if st.button('지금 클릭! 🖱️', type='primary', use_container_width=True):
+                if st.session_state.rt_go_time is None:
+                    # 너무 성급한 클릭(지시 전에 누름) — 이론상 방지용
+                    st.warning('너무 빨랐어요! (행복도 -5)')
+                    st.session_state.pet_happiness = max(0, st.session_state.pet_happiness - 5)
+                else:
+                    rt = time.perf_counter() - st.session_state.rt_go_time
+                    st.session_state.rt_result = rt
+                    if rt < 1.0:
+                        st.success(f'대단해요! {rt:.3f}초 (행복도 +15)')
+                        st.session_state.pet_happiness = min(100, st.session_state.pet_happiness + 15)
+                    elif rt < 2.0:
+                        st.info(f'좋아요! {rt:.3f}초 (행복도 +8)')
+                        st.session_state.pet_happiness = min(100, st.session_state.pet_happiness + 8)
+                    else:
+                        st.write(f'다음엔 더 빠르게! {rt:.3f}초 (변화 없음)')
+                # 라운드 종료
+                st.session_state.rt_now = False
+                st.session_state.rt_go_time = None
+
+        # 성급한 클릭 방지용 안내
+        if st.session_state.rt_ready and not st.session_state.rt_now and st.session_state.rt_result is None:
+            st.caption('잠시 뒤 “지금 클릭!” 버튼이 나타나면 눌러주세요.')
+
+        # 결과 표시
+        if st.session_state.rt_result is not None:
+            st.write(f'최근 기록: {st.session_state.rt_result:.3f}초')
+
+    # 공통: 현재 행복도
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+    st.write(f'현재 행복도: {st.session_state.pet_happiness}%')
+
+    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+    if st.button('← 뒤로가기 (펫 화면)', use_container_width=True):
+        st.session_state.view = 'home'
+        st.rerun()
 
     st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
     if st.button('← 뒤로가기 (펫 화면)'):
