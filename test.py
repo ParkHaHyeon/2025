@@ -70,7 +70,7 @@ if st.session_state.view == 'setup':
     with col_b:
         if st.button('랜덤 이름 넣기 🎲', use_container_width=True):
             # 간단 랜덤 이름
-            candidates = ["콩이", "희망이", "콜라", "겨울이", "동강이", "장군이", "네로"]
+            candidates = ["콩이", "희망이", "콜라", "겨울이", "동강이", "장군이", "네로", "나비", "식빵이", "연탄이", "초코초키"]
             st.session_state.pet_name = random.choice(candidates)
             st.session_state.user_name = st.session_state.user_name or "사용자"
             st.rerun()
@@ -127,7 +127,7 @@ elif st.session_state.view == 'game':
     st.progress(st.session_state.pet_happiness / 100)
     st.write(f'{st.session_state.pet_name}의 현재 행복도: {st.session_state.pet_happiness}%')
     st.divider()
-    st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
     
     st.write(f'{st.session_state.pet_name}과(와) 동전 뒤집기 게임을 해보세요! 맞히면 행복도가 올라가요.')
      
