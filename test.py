@@ -126,8 +126,7 @@ elif st.session_state.view == 'game':
     st.write(message)
     st.progress(st.session_state.pet_happiness / 100)
     st.write(f'{st.session_state.pet_name}의 현재 행복도: {st.session_state.pet_happiness}%')
-    st.divider()
-    st.markdown("<div style='height: 5px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 48px;'></div>", unsafe_allow_html=True)
     
     st.write(f'{st.session_state.pet_name}과(와) 동전 뒤집기 게임을 해보세요! 맞히면 행복도가 올라가요.')
      
