@@ -10,9 +10,7 @@ if 'pet_name' not in st.session_state:
     st.session_state.pet_name = ""
 if 'user_name' not in st.session_state:
     st.session_state.user_name = ""
-    if 'game_type' not in st.session_state:
-    st.session_state.game_type = '동전 뒤집기'
-
+ 
 # 반응속도 테스트용 상태값
 if 'rt_now' not in st.session_state:
     st.session_state.rt_now = False
