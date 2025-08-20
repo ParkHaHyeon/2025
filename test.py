@@ -280,12 +280,11 @@ elif st.session_state.view == 'game':
 
     # 공통: 현재 행복도
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+    st.progress(st.session_state.pet_happiness / 100)
     st.write(f'현재 행복도: {st.session_state.pet_happiness}%')
 
-    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-    if st.button('← 뒤로가기 (펫 화면)', use_container_width=True):
-        st.session_state.view = 'home'
-        st.rerun()
+  
+
 
     st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
     if st.button('← 뒤로가기 (펫 화면)'):
