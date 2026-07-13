@@ -1,8 +1,8 @@
-# app.py
+# app.py (수정본)
 import streamlit as st
 import time
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
 
 st.set_page_config(page_title="생각의 전환 - 독서 타이머", layout="centered")
@@ -23,14 +23,15 @@ def save_data(data):
 
 data = load_data()
 
-# ---------- 초기화 ----------
-if "user" not in st.session_state:
-    # 닉네임만 받아서 간단 익명화 처리
-    st.session_state.user = st.text_input("닉네임을 입력하세요 (예: 친구A)", value="익명사용자")
-    if st.session_state.user:
-        # ensure user exists in data
-        if st.session_state.user not in data["users"]:
-            data["users"][st.session_state.user] = {
+# ---------- 사용자 설정 처리 (안전한 rerun) ----------
+def set_user():
+    # user_input 키의 값이 채워졌을 때 세션에 user를 넣고 재실행
+    user_input = st.session_state.get("user_input", "").strip()
+    if user_input:
+        st.session_state.user = user_input
+        # 사용자 데이터가 없으면 초기화
+        if user_input not in data["users"]:
+            data["users"][user_input] = {
                 "xp": 0,
                 "level": 1,
                 "evolution_stage": 1,
@@ -39,22 +40,35 @@ if "user" not in st.session_state:
                 "items": []
             }
             save_data(data)
+        # 안전하게 페이지를 다시 그리기
         st.experimental_rerun()
-else:
-    user = st.session_state.user
+
+# 사이드바에 닉네임 입력 위젯 배치(입력 후 엔터 또는 확인으로 set_user 호출)
+st.sidebar.title("사용자 설정")
+st.sidebar.text_input("닉네임을 입력하세요 (예: 친구A)", key="user_input", on_change=set_user)
+st.sidebar.write("닉네임을 입력하면 앱이 로드됩니다. 익명으로 사용하세요.")
+
+# 닉네임이 세션에 없으면 메인 화면에서 안내만 보여주고 종료
+if "user" not in st.session_state:
+    st.title("생각의 전환 - 독서 타이머 (프로토타입)")
+    st.write("사이드바에 닉네임을 입력해 주세요. 입력 후 엔터 또는 확인을 누르면 앱이 시작됩니다.")
+    st.stop()
+
+# 이제 안전하게 user 사용
+user = st.session_state.user
 
 # 캐릭터 설정(간단)
 THRESHOLDS = {
     "small_feed": 5,    # 분
     "med_feed": 20,     # 분
-    "complete_book_pages": 100  # 기본 완독 페이지 기준(사용자가 바꿀 수 있음)
+    "complete_book_pages": 100  # 기본 완독 페이지 기준
 }
 
 # ---------- 상단: 캐릭터 상태 요약 ----------
 st.title("생각의 전환 - 독서 타이머 (프로토타입)")
-st.markdown(f"안녕하세요, **{st.session_state.user}** 님. 아래에서 오늘의 목표를 정하고 타이머를 시작하세요.")
+st.markdown(f"안녕하세요, **{user}** 님. 아래에서 오늘의 목표를 정하고 타이머를 시작하세요.")
 
-user_data = data["users"][st.session_state.user]
+user_data = data["users"][user]
 col1, col2 = st.columns(2)
 with col1:
     st.subheader("캐릭터 상태")
@@ -66,9 +80,9 @@ with col2:
     st.subheader("오늘 목표")
     goal_type = st.selectbox("목표 타입 선택", ["시간(분)", "페이지 수"])
     if goal_type == "시간(분)":
-        today_goal = st.number_input("오늘 목표(분)", min_value=1, value=5, step=1)
+        today_goal = st.number_input("오늘 목표(분)", min_value=1, value=5, step=1, key="today_goal_min")
     else:
-        today_goal = st.number_input("오늘 목표(페이지)", min_value=1, value=10, step=1)
+        today_goal = st.number_input("오늘 목표(페이지)", min_value=1, value=10, step=1, key="today_goal_page")
 
 # ---------- 타이머 로직 ----------
 st.markdown("---")
@@ -88,26 +102,23 @@ with start_col:
             st.session_state.timer_running = True
             st.session_state.timer_start = time.time()
             st.success("타이머가 시작되었습니다. 집중해서 읽어보세요!")
-            st.experimental_rerun()
+            # 재실행 없이 상태만 변경하고 다음 렌더링에서 반영되도록 함
 with stop_col:
     if st.button("타이머 중지"):
-        if st.session_state.timer_running:
+        if st.session_state.timer_running and st.session_state.timer_start is not None:
             elapsed = time.time() - st.session_state.timer_start
             minutes = int(elapsed // 60)
-            # 소수점 이하 반올림 대신 초단위도 반영 가능합니다.
             st.session_state.accum_today += minutes
             st.session_state.timer_running = False
             st.session_state.timer_start = None
-            # 로그 저장
             now = datetime.now().isoformat()
             data["logs"].append({
-                "user": st.session_state.user,
+                "user": user,
                 "timestamp": now,
                 "minutes": minutes,
-                "pages": 0,  # 페이지는 수동 입력 또는 후처리 가능
+                "pages": 0,
                 "goal_type": "manual_stop"
             })
-            # 누적 합산
             user_data["total_minutes"] += minutes
             save_data(data)
             st.success(f"{minutes}분이 기록되었습니다.")
@@ -116,8 +127,9 @@ with reset_col:
     if st.button("오늘 누적 초기화"):
         st.session_state.accum_today = 0
         st.info("오늘 누적 시간이 초기화되었습니다.")
+        # 재실행은 필요 없음
 
-# 타이머 표시 (비동기적 갱신을 위한 간단한 방법)
+# 타이머 표시 (간단 방식)
 timer_placeholder = st.empty()
 if st.session_state.timer_running:
     elapsed = int(time.time() - st.session_state.timer_start)
@@ -132,12 +144,12 @@ else:
 # ---------- 페이지 수 입력 ----------
 st.markdown("---")
 st.subheader("페이지 수 입력(선택)")
-pages_today = st.number_input("오늘 읽은 페이지 수를 입력하세요", min_value=0, value=0, step=1)
+pages_today = st.number_input("오늘 읽은 페이지 수를 입력하세요", min_value=0, value=0, step=1, key="pages_input")
 if st.button("페이지 수 등록"):
     if pages_today > 0:
         now = datetime.now().isoformat()
         data["logs"].append({
-            "user": st.session_state.user,
+            "user": user,
             "timestamp": now,
             "minutes": 0,
             "pages": pages_today,
@@ -154,7 +166,6 @@ if st.button("페이지 수 등록"):
 st.markdown("---")
 st.subheader("캐릭터와 상호작용")
 
-# 오늘 기준 누적 시간(앱 내 기록 + session_state)
 today_minutes_for_actions = st.session_state.accum_today
 st.write(f"오늘 누적 시간: {today_minutes_for_actions}분 (앱에 기록된 시간만 포함)")
 
@@ -162,7 +173,6 @@ col_a, col_b, col_c = st.columns(3)
 with col_a:
     if today_minutes_for_actions >= THRESHOLDS["small_feed"]:
         if st.button("먹이 주기 (소)"):
-            # XP와 간단 보상
             gained = 10
             user_data["xp"] += gained
             save_data(data)
@@ -179,10 +189,8 @@ with col_b:
     else:
         st.button(f"먹이 주기 (중) - {THRESHOLDS['med_feed']}분 필요", disabled=True)
 with col_c:
-    # 완독 보상: 사용자가 '완독했다고 표시'하거나 페이지 수 기준 초과시
-    book_pages = st.number_input("현재 읽는 책 전체 페이지 수", min_value=1, value=THRESHOLDS["complete_book_pages"], step=1)
+    book_pages = st.number_input("현재 읽는 책 전체 페이지 수", min_value=1, value=THRESHOLDS["complete_book_pages"], step=1, key="book_pages_input")
     if st.button("완독 표시 (완독 시 캐릭터 진화)"):
-        # 사용자가 페이지를 입력해 total_pages에 누적했을 경우 진화
         if user_data["total_pages"] >= book_pages:
             user_data["evolution_stage"] += 1
             user_data["xp"] += 200
@@ -203,7 +211,7 @@ if user_data["xp"] >= 100 * user_data["level"]:
 st.markdown("---")
 st.subheader("사전·사후 간단 설문")
 
-survey_type = st.selectbox("설문 선택", ["사전 설문", "사후 설문"])
+survey_type = st.selectbox("설문 선택", ["사전 설문", "사후 설문"], key="survey_type")
 with st.form(key="survey_form"):
     avg_minutes = st.number_input("평소 하루 평균 독서 시간(분)을 적어주세요", min_value=0, value=10, step=1)
     interest = st.slider("책에 대한 흥미", 1, 5, 3)
@@ -212,7 +220,7 @@ with st.form(key="survey_form"):
     if submitted:
         now = datetime.now().isoformat()
         data["surveys"].append({
-            "user": st.session_state.user,
+            "user": user,
             "time": now,
             "type": survey_type,
             "avg_minutes": int(avg_minutes),
@@ -225,7 +233,7 @@ with st.form(key="survey_form"):
 # ---------- 로그 보기(개인용) ----------
 st.markdown("---")
 st.subheader("내 기록 보기 (최근 10개)")
-user_logs = [l for l in data["logs"] if l["user"] == st.session_state.user]
+user_logs = [l for l in data["logs"] if l["user"] == user]
 if user_logs:
     for log in user_logs[-10:]:
         st.write(f"{log['timestamp'][:19]} — 분: {log['minutes']}, 페이지: {log['pages']}")
