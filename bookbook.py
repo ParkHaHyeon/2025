@@ -47,7 +47,11 @@ st.sidebar.title("사용자 설정")
 st.sidebar.text_input("닉네임을 입력하세요 (예: 친구A)", key="user_input", on_change=set_user)
 st.sidebar.write("닉네임을 입력하면 앱이 로드됩니다. 익명으로 사용하세요.")
         # 안전하게 페이지를 다시 그리기
-        st.experimental_rerun()
+def set_user():
+    user = st.session_state.get("user_input", "").strip()
+    if user:
+        st.session_state.user = user
+        # 데이터 초기화 후 rerun 없이 그대로 다음 렌더링에서 동작하게 함
 
 # 사이드바에 닉네임 입력 위젯 배치(입력 후 엔터 또는 확인으로 set_user 호출)
 st.sidebar.title("사용자 설정")
