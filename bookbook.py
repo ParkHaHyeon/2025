@@ -213,7 +213,7 @@ st.subheader("사전·사후 간단 설문")
 survey_type = st.selectbox("설문 선택", ["사전 설문", "사후 설문"], key="survey_type")
 with st.form(key="survey_form"):
     import webbrowser
-    webbrowser.open(https://docs.google.com/forms/d/e/1FAIpQLSdlxENEMM31eK2Er-QpgQEej2Mz0azUnWXC2YDF4DuEkPp83g/viewform?usp=header)
+    webbrowser.open('https://docs.google.com/forms/d/e/1FAIpQLSdlxENEMM31eK2Er-QpgQEej2Mz0azUnWXC2YDF4DuEkPp83g/viewform?usp=header')
 
 # ---------- 로그 보기(개인용) ----------
 st.markdown("---")
