@@ -120,7 +120,7 @@ with stop_col:
             user_data["total_minutes"] += minutes
             save_data(data)
             st.success(f"{minutes}분이 기록되었습니다.")
-            st.experimental_rerun()
+
 with reset_col:
     if st.button("오늘 누적 초기화"):
         st.session_state.accum_today = 0
@@ -134,8 +134,7 @@ if st.session_state.timer_running:
     mins = elapsed // 60
     secs = elapsed % 60
     timer_placeholder.markdown(f"진행 중: {mins}분 {secs}초")
-    time.sleep(1)
-    st.experimental_rerun()
+    st.info("실시간 초단위 갱신은 제한됩니다. '타이머 중지'를 눌러 기록하세요.")
 else:
     timer_placeholder.markdown(f"오늘 누적 독서 시간(앱 내 기록): {st.session_state.accum_today}분")
 
@@ -156,7 +155,6 @@ if st.button("페이지 수 등록"):
         user_data["total_pages"] += int(pages_today)
         save_data(data)
         st.success(f"{pages_today}페이지가 기록되었습니다.")
-        st.experimental_rerun()
     else:
         st.warning("0보다 큰 값을 입력해 주세요.")
 
@@ -198,9 +196,12 @@ with col_c:
             st.warning("완독 조건을 충족하지 못했습니다. 먼저 페이지 수를 기록해 주세요.")
 
 # 간단 레벨업 로직
-if user_data["xp"] >= 100 * user_data["level"]:
+leveled_up = False
+while user_data["xp"] >= 100 * user_data["level"]:
     user_data["xp"] -= 100 * user_data["level"]
     user_data["level"] += 1
+    leveled_up = True
+if leveled_up:
     save_data(data)
     st.balloons()
     st.success("레벨업! 축하합니다.")
