@@ -207,13 +207,15 @@ if leveled_up:
     st.success("레벨업! 축하합니다.")
 
 # ---------- 사전/사후 설문 ----------
-st.markdown("---")
-st.subheader("사전·사후 간단 설문")
+# --- 간단 링크 방식 (붙여넣기용) ---
+pre_url = "https://docs.google.com/forms/d/e/1FAIpQLSdlxENEMM31eK2Er-QpgQEej2Mz0azUnWXC2YDF4DuEkPp83g/viewform?usp=header"
+post_url = "https://docs.google.com/forms/d/e/1FAIpQLSepOCxzVENWLuSaabe5N-Tu8RgX5BPLElnpXGVynwO8CTY0HA/viewform?usp=header"
 
-survey_type = st.selectbox("설문 선택", ["사전 설문", "사후 설문"], key="survey_type")
-with st.form(key="survey_form"):
-    import webbrowser
-    webbrowser.open('https://docs.google.com/forms/d/e/1FAIpQLSdlxENEMM31eK2Er-QpgQEej2Mz0azUnWXC2YDF4DuEkPp83g/viewform?usp=header')
+st.markdown("### 사전 설문")
+st.markdown(f"- [사전 설문지 열기]({pre_url})  (새 탭에서 열립니다)")
+
+st.markdown("### 사후 설문")
+st.markdown(f"- [사후 설문지 열기]({post_url})  (새 탭에서 열립니다)")
 
 # ---------- 로그 보기(개인용) ----------
 st.markdown("---")
