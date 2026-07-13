@@ -23,8 +23,7 @@ def save_data(data):
 
 data = load_data()
 
-# ---------- 사용자 설정 처리 (안전한 rerun) ----------
-# 사용자 설정 처리 (간단하고 안전한 방식)
+# ---------- 사용자 설정 처리 (간단하고 안전한 방식) ----------
 def set_user():
     user_input = st.session_state.get("user_input", "").strip()
     if user_input:
@@ -42,23 +41,12 @@ def set_user():
             save_data(data)
         # st.experimental_rerun() 호출 제거 — 세션 상태만 변경하면 다음 렌더링에서 반영됩니다
 
-# 사이드바에 닉네임 입력 위젯 설정
-st.sidebar.title("사용자 설정")
-st.sidebar.text_input("닉네임을 입력하세요 (예: 친구A)", key="user_input", on_change=set_user)
-st.sidebar.write("닉네임을 입력하면 앱이 로드됩니다. 익명으로 사용하세요.")
-        # 안전하게 페이지를 다시 그리기
-def set_user():
-    user = st.session_state.get("user_input", "").strip()
-    if user:
-        st.session_state.user = user
-        # 데이터 초기화 후 rerun 없이 그대로 다음 렌더링에서 동작하게 함
-
-# 사이드바에 닉네임 입력 위젯 배치(입력 후 엔터 또는 확인으로 set_user 호출)
+# 사이드바에 닉네임 입력 위젯 배치(한 번만 생성)
 st.sidebar.title("사용자 설정")
 st.sidebar.text_input("닉네임을 입력하세요 (예: 친구A)", key="user_input", on_change=set_user)
 st.sidebar.write("닉네임을 입력하면 앱이 로드됩니다. 익명으로 사용하세요.")
 
-# 닉네임이 세션에 없으면 메인 화면에서 안내만 보여주고 종료
+# 닉네임이 세션에 없으면 안내 후 종료
 if "user" not in st.session_state:
     st.title("생각의 전환 - 독서 타이머 (프로토타입)")
     st.write("사이드바에 닉네임을 입력해 주세요. 입력 후 엔터 또는 확인을 누르면 앱이 시작됩니다.")
