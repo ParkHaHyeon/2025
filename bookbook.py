@@ -212,22 +212,8 @@ st.subheader("사전·사후 간단 설문")
 
 survey_type = st.selectbox("설문 선택", ["사전 설문", "사후 설문"], key="survey_type")
 with st.form(key="survey_form"):
-    avg_minutes = st.number_input("평소 하루 평균 독서 시간(분)을 적어주세요", min_value=0, value=10, step=1)
-    interest = st.slider("책에 대한 흥미", 1, 5, 3)
-    self_efficacy = st.slider("독서 자기효능감(할 수 있다 느낌)", 1, 5, 3)
-    submitted = st.form_submit_button("설문 제출")
-    if submitted:
-        now = datetime.now().isoformat()
-        data["surveys"].append({
-            "user": user,
-            "time": now,
-            "type": survey_type,
-            "avg_minutes": int(avg_minutes),
-            "interest": int(interest),
-            "self_efficacy": int(self_efficacy)
-        })
-        save_data(data)
-        st.success(f"{survey_type}이 저장되었습니다.")
+    import webbrowser
+    webbrowser.open(https://docs.google.com/forms/d/e/1FAIpQLSdlxENEMM31eK2Er-QpgQEej2Mz0azUnWXC2YDF4DuEkPp83g/viewform?usp=header)
 
 # ---------- 로그 보기(개인용) ----------
 st.markdown("---")
