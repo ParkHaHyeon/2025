@@ -24,8 +24,8 @@ def save_data(data):
 data = load_data()
 
 # ---------- 사용자 설정 처리 (안전한 rerun) ----------
+# 사용자 설정 처리 (간단하고 안전한 방식)
 def set_user():
-    # user_input 키의 값이 채워졌을 때 세션에 user를 넣고 재실행
     user_input = st.session_state.get("user_input", "").strip()
     if user_input:
         st.session_state.user = user_input
@@ -40,6 +40,12 @@ def set_user():
                 "items": []
             }
             save_data(data)
+        # st.experimental_rerun() 호출 제거 — 세션 상태만 변경하면 다음 렌더링에서 반영됩니다
+
+# 사이드바에 닉네임 입력 위젯 설정
+st.sidebar.title("사용자 설정")
+st.sidebar.text_input("닉네임을 입력하세요 (예: 친구A)", key="user_input", on_change=set_user)
+st.sidebar.write("닉네임을 입력하면 앱이 로드됩니다. 익명으로 사용하세요.")
         # 안전하게 페이지를 다시 그리기
         st.experimental_rerun()
 
